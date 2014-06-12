@@ -8,22 +8,35 @@ import java.util.List;
 public class Main {
 
 	public static void main(String[] args) {
-		List<String> test = new ArrayList<String>();
-		List<String> test1 = new ArrayList<String>();
-		test.add("This is a test");
-		test.add("One more test");
-		test1.add("This is a test");
-		test1.add("One more test");
 		List<Job> hdd = new ArrayList<Job>();
 		List<Job> ram = new ArrayList<Job>();
-
-		
+		//write the contents of the file into the List<Job> object
 		hdd=readAndWrite();
+		
+		
 		ram=fifo(hdd);
-		printRam(ram);
 		printSpaces("FIFO");
 		printRam(ram);
-
+		//clear the ram for the next algorithm
+		ram = new ArrayList<Job>();
+		
+		ram=sjf(hdd);
+		printSpaces("Shortest Job First");
+		printRam(ram);
+		//clear the ram for the next algorithm
+		ram = new ArrayList<Job>();
+		
+		ram=priority(hdd);
+		printSpaces("Priority");
+		printRam(ram);
+		//clear the ram for the next algorithm
+		ram = new ArrayList<Job>();
+		
+		
+		
+		
+		
+		
 	}
 
 	public static void printRam(List<Job> ram) {
@@ -31,7 +44,7 @@ public class Main {
 	}
 	
 	public static void printSpaces(String alg) {
-		System.out.println("\nAlgorithm: "+alg);
+		System.out.println("Algorithm: "+alg);
 	}
 
 	public static void printHDD(List<Job> hdd) {
