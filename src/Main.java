@@ -3,6 +3,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -57,10 +58,12 @@ public class Main {
 	}
 
 	public static List<Job> sjf(List<Job> hdd) {
+		Collections.sort(hdd, Job.sjf);
 		return hdd;
 	}
 
 	public static List<Job> priority(List<Job> hdd) {
+		Collections.sort(hdd, Job.thePriority);
 		return hdd;
 	}
 
