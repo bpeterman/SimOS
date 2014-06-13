@@ -50,7 +50,8 @@ public class Job {
 	public String toString() {
 		return String.format("Job Number: " + jobNum + " Size: " + size
 				+ " Priority: " + priority + " Intructions: "
-				+ Arrays.toString(instr.toArray()));
+				+ Arrays.toString(instr.toArray()))
+				+ "\n";
 	}
 
 	/* Comparator for sorting the list by size */
@@ -65,17 +66,17 @@ public class Job {
 			// return no2-no1;
 		}
 	};
-	
+
 	/* Comparator for sorting the list by priority */
 	public static Comparator<Job> thePriority = new Comparator<Job>() {
 		public int compare(Job j1, Job j2) {
 			int no1 = j1.getPriority();
 			int no2 = j2.getPriority();
 			/* For ascending order */
-			//return no1 - no2;
+			// return no1 - no2;
 
 			/* For descending order */
-			return no2-no1;
+			return no2 - no1;
 		}
 	};
 
