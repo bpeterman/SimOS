@@ -11,26 +11,23 @@ public class Main {
 	public static void main(String[] args) {
 		List<Job> hdd = new ArrayList<Job>();
 		List<Job> ram = new ArrayList<Job>();
-		// write the contents of the file into the List<Job> object
-		hdd = readAndWrite();
+		hdd = readAndWrite(); // write the contents of the file into the
+								// List<Job> object
 
 		ram = fifo(hdd);
 		printSpaces("FIFO");
 		printRam(ram);
-		// clear the ram for the next algorithm
-		ram = new ArrayList<Job>();
+		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
 
 		ram = sjf(hdd);
 		printSpaces("Shortest Job First");
 		printRam(ram);
-		// clear the ram for the next algorithm
-		ram = new ArrayList<Job>();
+		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
 
 		ram = priority(hdd);
 		printSpaces("Priority");
 		printRam(ram);
-		// clear the ram for the next algorithm
-		ram = new ArrayList<Job>();
+		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
 
 	}
 
@@ -47,12 +44,13 @@ public class Main {
 
 	}
 
+	// Scheduler for the FIFO algorithm
 	public static List<Job> fifo(List<Job> hdd) {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		for (Job job : hdd) {
-			if ((job.getSize() + jobCount) <= 100) {
-				temp.add(job);
+			if ((job.getSize() + jobCount) <= 100) { // if the job less than or
+				temp.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				job = null;
 			}
@@ -60,6 +58,7 @@ public class Main {
 		return temp;
 	}
 
+	// Scheduler for the SJF algorithm
 	public static List<Job> sjf(List<Job> hdd) {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
@@ -74,6 +73,7 @@ public class Main {
 		return temp;
 	}
 
+	// Scheduler for the priority algorithm
 	public static List<Job> priority(List<Job> hdd) {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
@@ -88,6 +88,7 @@ public class Main {
 		return temp;
 	}
 
+	// This reads all the data from the file and stores it in the hdd object.
 	public static List<Job> readAndWrite() {
 		int jobCount = 0;
 		int jobNum = 0;
