@@ -48,43 +48,43 @@ public class Main {
 	}
 
 	public static List<Job> fifo(List<Job> hdd) {
-		int jobCount=0;
+		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
-		for(Job job : hdd) {
-			  if((job.getSize()+jobCount)<=100){
-				  temp.add(job);
-				  jobCount+=job.getSize();
-				  job=null;
-			  }
+		for (Job job : hdd) {
+			if ((job.getSize() + jobCount) <= 100) {
+				temp.add(job);
+				jobCount += job.getSize();
+				job = null;
 			}
+		}
 		return temp;
 	}
 
 	public static List<Job> sjf(List<Job> hdd) {
-		int jobCount=0;
+		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.sjf);
-		for(Job job : hdd) {
-			  if((job.getSize()+jobCount)<=100){
-				  temp.add(job);
-				  jobCount+=job.getSize();
-				  job=null;
-			  }
+		for (Job job : hdd) {
+			if ((job.getSize() + jobCount) <= 100) {
+				temp.add(job);
+				jobCount += job.getSize();
+				job = null;
 			}
+		}
 		return temp;
 	}
 
 	public static List<Job> priority(List<Job> hdd) {
-		int jobCount=0;
+		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.thePriority);
-		for(Job job : hdd) {
-			  if((job.getSize()+jobCount)<=100){
-				  temp.add(job);
-				  jobCount+=job.getSize();
-				  job=null;
-			  }
+		for (Job job : hdd) {
+			if ((job.getSize() + jobCount) <= 100) {
+				temp.add(job);
+				jobCount += job.getSize();
+				job = null;
 			}
+		}
 		return temp;
 	}
 
