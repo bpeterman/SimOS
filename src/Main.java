@@ -24,6 +24,7 @@ public class Main {
 		printHDD();
 		STS();
 		printRam("FIFO");
+		printRQ();
 		
 
 	}
@@ -50,7 +51,8 @@ public class Main {
 				hdd.remove(job);
 				i--;
 			
-			}
+			} else
+				break;
 		}
 		return temp;
 	}
@@ -67,7 +69,8 @@ public class Main {
 				jobCount += job.getSize();
 				hdd.remove(job);
 				i--;
-			}
+			} else
+				break;
 		}
 		return temp;
 	}
@@ -84,7 +87,8 @@ public class Main {
 				jobCount += job.getSize();
 				hdd.remove(job);
 				i--;
-			}
+			} else
+				break;
 		}
 		return temp;
 	}
@@ -147,11 +151,13 @@ public class Main {
 	}
 
 	public static void printHDD() {
+		System.out.println("Print the HDD");
 		System.out.println(Arrays.toString(hdd.toArray()));
 
 	}
 	
 	public static void printRQ() {
+		System.out.println("Print the RQ");
 		System.out.println(Arrays.toString(ReadyQueue.toArray()));
 
 	}
