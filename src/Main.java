@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
+	static int cycleCount=0;
 	static List<Job> ram = new ArrayList<Job>();
 	static List<Job> ReadyQueue = new ArrayList<Job>();
 	static List<Job> IOqueue = new ArrayList<Job>();
@@ -25,13 +26,93 @@ public class Main {
 		STS();
 		printRam("FIFO");
 		printRQ();
+		execCPU();
 		
 
 	}
 
+	
+	public static void execCPU(){
+		while(!ReadyQueue.isEmpty()){
+			Job job = ReadyQueue.get(0);
+			if (job.getProcessState().equals("ready")){
+				job.setProcessState("running");
+				if (!job.getInstr().isEmpty()){
+					for (int i =0; i<job.getInstr().size(); i++){
+						//Section to determine if there is something ready to be moved
+						if(checkInter())
+							break;
+						
+						
+						//End section to see if there is something ready
+						String strCommand=job.getInstr().get(i);
+						String[] commandArr = strCommand.split(", ");
+						if (commandArr[1].equals("mul")){
+							job.myCPU.mul(commandArr[2].charAt(0), commandArr[3].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("sub")){
+							job.myCPU.sub(commandArr[2].charAt(0), commandArr[3].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("add")){
+							job.myCPU.add(commandArr[2].charAt(0), commandArr[3].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("div")){
+							job.myCPU.div(commandArr[2].charAt(0), commandArr[3].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("rcl")){
+							job.myCPU.rcl(commandArr[2].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("sto")){
+							job.myCPU.sto(commandArr[4].charAt(0));
+							// Increase the program counter
+							job.programCounter++;
+							cycleCount++;
+						}
+						else if (commandArr[1].equals("_rd") || commandArr[1].equals("_wr")){
+							job.programCounter++;
+							cycleCount++;
+							job.setIOtime(Integer.parseInt(commandArr[4])+cycleCount);
+							job.setProcessState("IOwaiting");
+							IOqueue.add(job);
+							ReadyQueue.remove(0);
+							break;
+						}
+						else if (commandArr[1].equals("_wt")){
+							job.programCounter++;
+							cycleCount++;
+							job.setWaitTime(Integer.parseInt(commandArr[4])+cycleCount);
+							job.setProcessState("waiting");
+							WaitQueue.add(job);
+							ReadyQueue.remove(0);
+							break;
+						}
+					}
+					
+				}
+			}
+		}
+	}
+	
+	
 	public static void STS(){
 		for (int i = 0; i < ram.size(); i++) {
 			Job job = ram.get(i);
+			job.setProcessState("ready");
 			ReadyQueue.add(job);
 			ram.remove(i);
 			i--;
@@ -101,7 +182,7 @@ public class Main {
 		int priority = 0;
 		
 		List<String> jobs = new ArrayList<String>();
-	
+		CPU myCPU = new CPU(1, 3, 5, 7, 9);
 		BufferedReader br = null;
 	
 		try {
@@ -111,7 +192,7 @@ public class Main {
 				if (sCurrentLine.contains("Job")) {
 					if (jobCount != 0) {
 						Job myJob = new Job(jobNum, size, priority, jobs,
-								"new", null, 0);
+								"new", myCPU, 0, 0, 0);
 						hdd.add(myJob);
 						myJob = null;
 						jobs = new ArrayList<String>();
@@ -137,7 +218,7 @@ public class Main {
 				ex.printStackTrace();
 			}
 		}
-		Job myJob = new Job(jobNum, size, priority, jobs, "new", null, 0);
+		Job myJob = new Job(jobNum, size, priority, jobs, "new", myCPU, 0, 0, 0);
 		hdd.add(myJob);
 		myJob = null;
 		jobs = null;
@@ -160,6 +241,37 @@ public class Main {
 		System.out.println("Print the RQ");
 		System.out.println(Arrays.toString(ReadyQueue.toArray()));
 
+	}
+	
+	
+	public static boolean checkInter(){
+		
+		Job testJob = null;
+		if (!IOqueue.isEmpty()){
+			for (int j = 0; j < IOqueue.size(); j++) {
+				testJob = IOqueue.get(j);
+				if (cycleCount == testJob.IOtime){
+					testJob.setProcessState("ready");
+					testJob.setIOtime(0);
+					IOqueue.remove(j);
+					ReadyQueue.add(0, testJob);
+					return true;
+				}
+			}
+		}
+		if (!WaitQueue.isEmpty())
+			for (int j = 0; j < WaitQueue.size(); j++) {
+				testJob = WaitQueue.get(j);
+				if (cycleCount == testJob.waitTime){
+					testJob.setProcessState("ready");
+					testJob.setWaitTime(0);
+					WaitQueue.remove(j);
+					ReadyQueue.add(0, testJob);
+					return true;
+				}
+		}
+		
+		return false;
 	}
 
 }

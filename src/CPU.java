@@ -13,25 +13,40 @@ public class CPU {
 		this.D = D;
 		this.Acc = Acc;
 	}
-
-	public void add(int reg1, int reg2) {
-		setAcc(reg1 + reg2);
+	
+	public int getRegCon(char reg){
+		if (reg=='A')
+			return getA();
+		else if (reg == 'B')
+			return getB();
+		else if (reg == 'C')
+			return getC();
+		else if (reg == 'D')
+			return getD();
+		else
+			return 0;
 	}
 
-	public void sub(int reg1, int reg2) {
-		setAcc(reg2 - reg1);
+	public void add(char reg1, char reg2) {
+		setAcc((getRegCon(reg1) + getRegCon(reg2))+getAcc());
 	}
 
-	public void mul(int reg1, int reg2) {
-		setAcc(reg1 * reg2);
+	public void sub(char reg1, char reg2) {
+		setAcc((getRegCon(reg2) - getRegCon(reg1))+getAcc());
 	}
 
-	public void div(int reg1, int reg2) {
-		setAcc(reg2 / reg1);
+	public void mul(char reg1, char reg2) {
+		setAcc((getRegCon(reg1) * getRegCon(reg2))+getAcc());
+	}
+
+	public void div(char reg1, char reg2) {
+		if (getRegCon(reg1)!=0 && getRegCon(reg1)!=0)
+			setAcc((getRegCon(reg2) / getRegCon(reg1))+getAcc());
+		
 	}
 	
-	public void sto(int reg1) {
-		setAcc(reg1);
+	public void sto(char reg1) {
+		setAcc(getRegCon(reg1));
 	}
 	
 	public void rcl(char reg1) {
