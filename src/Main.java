@@ -19,16 +19,14 @@ public class Main {
 		hdd = readAndWrite(); // write the contents of the file into the
 								// List<Job> object
 		printHDD();
-		while(!hdd.isEmpty()){
-			ram = fifo();
-			// printRam using the FIFO LTS scheduler
-			printRam("FIFO");
-			printHDD();
-			STS();
-			printRam("Just Print");
-			printRQ();
-			loopExecuteSeq();
-		}
+		ram = fifo();
+		// printRam using the FIFO LTS scheduler
+		printRam("FIFO");
+		printHDD();
+		STS();
+		printRam("Just Print");
+		printRQ();
+		loopExecuteSeq();
 
 	}
 
