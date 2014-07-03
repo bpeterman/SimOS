@@ -1,41 +1,51 @@
 import java.util.List;
 
-
 public class CPU {
 	int A;
 	int B;
 	int C;
 	int D;
 	int Acc;
-	int lastintr;
 
-	public CPU(int A, int B, int C, int D, int Acc, int lastintr) {
+	public CPU(int A, int B, int C, int D, int Acc) {
 		this.A = A;
 		this.B = B;
 		this.C = C;
 		this.D = D;
 		this.Acc = Acc;
-		this.lastintr = lastintr;
+	}
+
+	public void add(int reg1, int reg2) {
+		setAcc(reg1 + reg2);
+	}
+
+	public void sub(int reg1, int reg2) {
+		setAcc(reg2 - reg1);
+	}
+
+	public void mul(int reg1, int reg2) {
+		setAcc(reg1 * reg2);
+	}
+
+	public void div(int reg1, int reg2) {
+		setAcc(reg2 / reg1);
 	}
 	
-	public void add(int reg1, int reg2){
-		setAcc(reg1+reg2);
+	public void sto(int reg1) {
+		setAcc(reg1);
 	}
 	
-	public void sub(int reg1, int reg2){
-		setAcc(reg2-reg1);
+	public void rcl(char reg1) {
+		int regval=getAcc();
+		if (reg1 == 'A')
+			setA(regval);
+		else if (reg1 == 'B')
+			setB(regval);
+		else if (reg1 == 'C')
+			setC(regval);
+		else if (reg1 == 'D')
+			setD(regval);
 	}
-	public void mul(int reg1, int reg2){
-		setAcc(reg1*reg2);
-	}
-	public void div(int reg1, int reg2){
-		setAcc(reg2/reg1);
-	}
-	
-	
-	
-	
-	
 	
 
 	public int getA() {
@@ -78,12 +88,4 @@ public class CPU {
 		Acc = acc;
 	}
 
-	public int getLastintr() {
-		return lastintr;
-	}
-
-	public void setLastintr(int lastintr) {
-		this.lastintr = lastintr;
-	}	
-	
 }

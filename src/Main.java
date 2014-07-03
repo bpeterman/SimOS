@@ -7,82 +7,82 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-
+	static List<Job> ram = new ArrayList<Job>();
+	static List<Job> ReadyQueue = new ArrayList<Job>();
+	static List<Job> IOqueue = new ArrayList<Job>();
+	static List<Job> WaitQueue = new ArrayList<Job>();
+	static List<Job> hdd = new ArrayList<Job>();
+	
 	public static void main(String[] args) {
-		List<Job> hdd = new ArrayList<Job>();
-		List<Job> ram = new ArrayList<Job>();
+
 		hdd = readAndWrite(); // write the contents of the file into the
 								// List<Job> object
 
-		ram = fifo(hdd);
-		printSpaces("FIFO");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
-
-		ram = sjf(hdd);
-		printSpaces("Shortest Job First");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
-
-		ram = priority(hdd);
-		printSpaces("Priority");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
+		ram = fifo();
+		//printRam using the FIFO LTS scheduler
+		printRam("FIFO");
+		printHDD();
+		STS();
+		printRQ();
+		
+		
 
 	}
 
-	public static void printRam(List<Job> ram) {
-		System.out.println(Arrays.toString(ram.toArray()));
+	public static void STS(){
+		for (int i = 0; i < ram.size(); i++) {
+			Job job = ram.get(i);
+			ReadyQueue.add(job);
+		}
 	}
-
-	public static void printSpaces(String alg) {
-		System.out.println("Algorithm: " + alg);
-	}
-
-	public static void printHDD(List<Job> hdd) {
-		System.out.println(Arrays.toString(hdd.toArray()));
-
-	}
-
+	
+	
+	
+	
+	
 	// Scheduler for the FIFO algorithm
-	public static List<Job> fifo(List<Job> hdd) {
+	public static List<Job> fifo() {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
-		for (Job job : hdd) {
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
 			if ((job.getSize() + jobCount) <= 100) { // if the job less than or
 				temp.add(job); // equal to 100 add it
 				jobCount += job.getSize();
-				job = null;
+				hdd.remove(job);
+			
 			}
 		}
 		return temp;
 	}
 
 	// Scheduler for the SJF algorithm
-	public static List<Job> sjf(List<Job> hdd) {
+	public static List<Job> sjf() {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.sjf);
-		for (Job job : hdd) {
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
 			if ((job.getSize() + jobCount) <= 100) {
 				temp.add(job);
 				jobCount += job.getSize();
-				job = null;
+				hdd.remove(job);
 			}
 		}
 		return temp;
 	}
 
 	// Scheduler for the priority algorithm
-	public static List<Job> priority(List<Job> hdd) {
+	public static List<Job> priority() {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.thePriority);
-		for (Job job : hdd) {
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
 			if ((job.getSize() + jobCount) <= 100) {
 				temp.add(job);
 				jobCount += job.getSize();
-				job = null;
+				hdd.remove(job);
 			}
 		}
 		return temp;
@@ -94,18 +94,19 @@ public class Main {
 		int jobNum = 0;
 		int size = 0;
 		int priority = 0;
-		List<Job> hdd = new ArrayList<Job>();
+		
 		List<String> jobs = new ArrayList<String>();
-
+	
 		BufferedReader br = null;
-
+	
 		try {
 			String sCurrentLine;
 			br = new BufferedReader(new FileReader("ugradPart1.txt"));
 			while ((sCurrentLine = br.readLine()) != null) {
 				if (sCurrentLine.contains("Job")) {
 					if (jobCount != 0) {
-						Job myJob = new Job(jobNum, size, priority, jobs);
+						Job myJob = new Job(jobNum, size, priority, jobs,
+								"new", null, 0);
 						hdd.add(myJob);
 						myJob = null;
 						jobs = new ArrayList<String>();
@@ -115,11 +116,11 @@ public class Main {
 					size = Integer.parseInt(parts[1]);
 					priority = Integer.parseInt(parts[2]);
 					jobCount++;
-
+	
 				} else {
 					jobs.add(sCurrentLine);
 				}
-
+	
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -131,11 +132,26 @@ public class Main {
 				ex.printStackTrace();
 			}
 		}
-		Job myJob = new Job(jobNum, size, priority, jobs);
+		Job myJob = new Job(jobNum, size, priority, jobs, "new", null, 0);
 		hdd.add(myJob);
 		myJob = null;
 		jobs = null;
 		return hdd;
+	
+	}
+
+	public static void printRam(String alg) {
+		System.out.println("Algorithm: " + alg);
+		System.out.println(Arrays.toString(ram.toArray()));
+	}
+
+	public static void printHDD() {
+		System.out.println(Arrays.toString(hdd.toArray()));
+
+	}
+	
+	public static void printRQ() {
+		System.out.println(Arrays.toString(ReadyQueue.toArray()));
 
 	}
 
