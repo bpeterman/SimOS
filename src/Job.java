@@ -7,20 +7,18 @@ public class Job {
 	int size;
 	int priority;
 	List<String> instr;
-	String processState;
 	CPU myCPU = new CPU(1, 3, 5, 7, 9);
 	int programCounter;
 	int waitTime;
 	int IOtime;
 
 	public Job(int jobNum, int size, int priority, List<String> instr,
-			String processState, CPU myCPU, int programCounter, int waitTime,
+			 CPU myCPU, int programCounter, int waitTime,
 			int IOtime) {
 		this.jobNum = jobNum;
 		this.size = size;
 		this.priority = priority;
 		this.instr = instr;
-		this.processState = processState;
 		this.myCPU = myCPU;
 		this.programCounter = programCounter;
 		this.waitTime = waitTime;
@@ -43,13 +41,6 @@ public class Job {
 		IOtime = iOtime;
 	}
 
-	public String getProcessState() {
-		return processState;
-	}
-
-	public void setProcessState(String processState) {
-		this.processState = processState;
-	}
 
 	public CPU getMyCPU() {
 		return myCPU;
@@ -110,8 +101,7 @@ public class Job {
 	public String toString() {
 		return String.format("Job Number: " + jobNum + " Size: " + size
 				+ " Priority: " + priority + " Intructions: "
-				+ Arrays.toString(instr.toArray()))
-				+ " State: " + processState + "\n";
+				+ Arrays.toString(instr.toArray()) +"\n");
 	}
 
 	/* Comparator for sorting the list by size */
