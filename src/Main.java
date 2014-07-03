@@ -23,7 +23,6 @@ public class Main {
 		printRam("FIFO");
 		printHDD();
 		STS();
-		printRQ();
 		
 		
 
@@ -36,10 +35,7 @@ public class Main {
 		}
 	}
 	
-	
-	
-	
-	
+
 	// Scheduler for the FIFO algorithm
 	public static List<Job> fifo() {
 		int jobCount = 0;
