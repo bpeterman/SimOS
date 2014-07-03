@@ -23,7 +23,7 @@ public class Main {
 		printRam("FIFO");
 		printHDD();
 		STS();
-		
+		printRam("FIFO");
 		
 
 	}
@@ -32,6 +32,8 @@ public class Main {
 		for (int i = 0; i < ram.size(); i++) {
 			Job job = ram.get(i);
 			ReadyQueue.add(job);
+			ram.remove(i);
+			i--;
 		}
 	}
 	
@@ -46,6 +48,7 @@ public class Main {
 				temp.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				hdd.remove(job);
+				i--;
 			
 			}
 		}
@@ -63,6 +66,7 @@ public class Main {
 				temp.add(job);
 				jobCount += job.getSize();
 				hdd.remove(job);
+				i--;
 			}
 		}
 		return temp;
@@ -79,6 +83,7 @@ public class Main {
 				temp.add(job);
 				jobCount += job.getSize();
 				hdd.remove(job);
+				i--;
 			}
 		}
 		return temp;
