@@ -14,6 +14,12 @@ public class CPU {
 		this.Acc = Acc;
 	}
 	
+	@Override
+	public String toString() {
+		return "CPU [A=" + A + ", B=" + B + ", C=" + C + ", D=" + D + ", Acc="
+				+ Acc + "]";
+	}
+
 	public int getRegCon(char reg){
 		if (reg=='A')
 			return getA();
