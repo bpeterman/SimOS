@@ -13,8 +13,7 @@ public class Job {
 	int IOtime;
 
 	public Job(int jobNum, int size, int priority, List<String> instr,
-			 CPU myCPU, int programCounter, int waitTime,
-			int IOtime) {
+			CPU myCPU, int programCounter, int waitTime, int IOtime) {
 		this.jobNum = jobNum;
 		this.size = size;
 		this.priority = priority;
@@ -40,7 +39,6 @@ public class Job {
 	public void setIOtime(int iOtime) {
 		IOtime = iOtime;
 	}
-
 
 	public CPU getMyCPU() {
 		return myCPU;
@@ -101,7 +99,7 @@ public class Job {
 	public String toString() {
 		return String.format("Job Number: " + jobNum + " Size: " + size
 				+ " Priority: " + priority + " Intructions: "
-				+ Arrays.toString(instr.toArray()) +"\n");
+				+ Arrays.toString(instr.toArray()) + "\n");
 	}
 
 	/* Comparator for sorting the list by size */

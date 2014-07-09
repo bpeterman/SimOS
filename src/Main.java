@@ -28,7 +28,7 @@ public class Main {
 			// printRam("Just Print");
 			// printRQ();
 			loopExecuteSeq();
-			System.out.println("Cycles: "+cycleCount);
+			System.out.println("Cycles: " + cycleCount);
 		}
 	}
 
@@ -50,11 +50,12 @@ public class Main {
 		if (!ReadyQueue.isEmpty()) {
 			if (ReadyQueue.get(0).programCounter != ReadyQueue.get(0)
 					.getInstr().size()) {
-				if(ReadyQueue.get(0).programCounter==0){
+				if (ReadyQueue.get(0).programCounter == 0) {
 					CPU myCPU = new CPU(1, 3, 5, 7, 9);
 					ReadyQueue.get(0).setMyCPU(myCPU);
 				}
-				String strCommand = ReadyQueue.get(0).getInstr().get(ReadyQueue.get(0).programCounter);
+				String strCommand = ReadyQueue.get(0).getInstr()
+						.get(ReadyQueue.get(0).programCounter);
 				String[] commandArr = strCommand.split(", ");
 				if (commandArr[1].equals("mul")) {
 					ReadyQueue.get(0).myCPU.mul(commandArr[2].charAt(0),
@@ -76,17 +77,19 @@ public class Main {
 					ReadyQueue.get(0).myCPU.rcl(commandArr[2].charAt(0));
 					ReadyQueue.get(0).programCounter++;
 				} else if (commandArr[1].equals("sto")) {
-					ReadyQueue.get(0).myCPU.sto(Integer.parseInt(commandArr[4]));
+					ReadyQueue.get(0).myCPU
+							.sto(Integer.parseInt(commandArr[4]));
 					ReadyQueue.get(0).programCounter++;
 				} else if (commandArr[1].equals("_rd")
 						|| commandArr[1].equals("_wr")) {
 					ReadyQueue.get(0).programCounter++;
-					ReadyQueue.get(0).setIOtime(Integer.parseInt(commandArr[4]) + cycleCount);
+					ReadyQueue.get(0).setIOtime(
+							Integer.parseInt(commandArr[4]) + cycleCount);
 					moveToIOQ(ReadyQueue.get(0));
 				} else if (commandArr[1].equals("_wt")) {
 					ReadyQueue.get(0).programCounter++;
-					ReadyQueue.get(0).setWaitTime(Integer.parseInt(commandArr[4])
-							+ cycleCount);
+					ReadyQueue.get(0).setWaitTime(
+							Integer.parseInt(commandArr[4]) + cycleCount);
 					moveToWaitQ(ReadyQueue.get(0));
 				}
 			} else {
@@ -209,7 +212,7 @@ public class Main {
 		int priority = 0;
 
 		List<String> jobs = new ArrayList<String>();
-		
+
 		BufferedReader br = null;
 
 		try {
@@ -218,8 +221,8 @@ public class Main {
 			while ((sCurrentLine = br.readLine()) != null) {
 				if (sCurrentLine.contains("Job")) {
 					if (jobCount != 0) {
-						Job myJob = new Job(jobNum, size, priority, jobs,
-								null, 0, 0, 0);
+						Job myJob = new Job(jobNum, size, priority, jobs, null,
+								0, 0, 0);
 						hdd.add(myJob);
 						myJob = null;
 						jobs = new ArrayList<String>();
