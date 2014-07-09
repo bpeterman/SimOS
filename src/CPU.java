@@ -51,8 +51,8 @@ public class CPU {
 		
 	}
 	
-	public void sto(char reg1) {
-		setAcc(getRegCon(reg1));
+	public void sto(int val) {
+		setAcc(val);
 	}
 	
 	public void rcl(char reg1) {

@@ -7,7 +7,7 @@ public class Job {
 	int size;
 	int priority;
 	List<String> instr;
-	CPU myCPU = new CPU(1, 3, 5, 7, 9);
+	CPU myCPU;
 	int programCounter;
 	int waitTime;
 	int IOtime;
