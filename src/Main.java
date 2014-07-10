@@ -9,7 +9,25 @@ import java.util.List;
 public class Main {
 	static int numCPUs=1;
 	static int ramSize=100;
-	
+	/*
+	 * 
+	 * Need to decrement waiting queues.  Also change where the times are set
+	 * Need to add multiple CPU support.
+	 * Change the way the CPU executes to execute a job only if there is a wait on last instruction.
+	 * Terminate queue
+	 * 
+	 * Maybe create some other CPU object to execute and store flags on state.
+	 * 
+	 * Load the Readyqueue with jobs on each CPU cycle, set limit on Readyqueue to the same as RAM
+	 * Handle readyqueue being full on transfer from waits
+	 * 
+	 * 
+	 * Add all of the statistics
+	 * 
+	 * Make YouTube Video
+	 * 
+	 * 
+	 */
 	
 	static int cycleCount = 0;
 	static List<Job> ram = new ArrayList<Job>();
@@ -17,6 +35,8 @@ public class Main {
 	static List<Job> IOqueue = new ArrayList<Job>();
 	static List<Job> WaitQueue = new ArrayList<Job>();
 	static List<Job> hdd = new ArrayList<Job>();
+	
+	// add a terminate queue
 
 	public static void main(String[] args) {
 
@@ -88,12 +108,12 @@ public class Main {
 						|| commandArr[1].equals("_wr")) {
 					ReadyQueue.get(0).programCounter++;
 					ReadyQueue.get(0).setIOtime(
-							Integer.parseInt(commandArr[4]) + cycleCount);
+							Integer.parseInt(commandArr[4]) + cycleCount); //change to just the time.
 					moveToIOQ(ReadyQueue.get(0));
 				} else if (commandArr[1].equals("_wt")) {
 					ReadyQueue.get(0).programCounter++;
 					ReadyQueue.get(0).setWaitTime(
-							Integer.parseInt(commandArr[4]) + cycleCount);
+							Integer.parseInt(commandArr[4]) + cycleCount); //change to just the time.
 					moveToWaitQ(ReadyQueue.get(0));
 				}
 			} else {
@@ -120,9 +140,11 @@ public class Main {
 	}
 
 	public static void checkWaitQueue() {
+		//insert decrement of all jobs here.
+		
 		if (!WaitQueue.isEmpty()) {
 			for (int i = 0; i < WaitQueue.size(); i++) {
-				if (WaitQueue.get(i).waitTime == cycleCount) {
+				if (WaitQueue.get(i).waitTime == cycleCount) { //be sure to change this to 0 not cycle count.
 					WaitQueue.get(i).setWaitTime(0);
 					ReadyQueue.add(WaitQueue.get(i));
 					WaitQueue.remove(i);
@@ -133,9 +155,12 @@ public class Main {
 	}
 
 	public static void checkIOqueue() {
+		//insert decrement of all jobs here.
+		
+		
 		if (!IOqueue.isEmpty()) {
 			for (int i = 0; i < IOqueue.size(); i++) {
-				if (IOqueue.get(i).IOtime == cycleCount) {
+				if (IOqueue.get(i).IOtime == cycleCount) { //be sure to change this to 0 not cycle count.
 					IOqueue.get(i).setIOtime(0);
 					ReadyQueue.add(IOqueue.get(i));
 					IOqueue.remove(i);
