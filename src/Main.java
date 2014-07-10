@@ -7,6 +7,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
+	static int numCPUs=1;
+	static int ramSize=100;
+	
+	
 	static int cycleCount = 0;
 	static List<Job> ram = new ArrayList<Job>();
 	static List<Job> ReadyQueue = new ArrayList<Job>();
@@ -156,7 +160,7 @@ public class Main {
 		List<Job> temp = new ArrayList<Job>();
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= 100) { // if the job less than or
+			if ((job.getSize() + jobCount) <= ramSize) { // if the job less than or
 				temp.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				hdd.remove(job);
@@ -175,7 +179,7 @@ public class Main {
 		Collections.sort(hdd, Job.sjf);
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= 100) {
+			if ((job.getSize() + jobCount) <= ramSize) {
 				temp.add(job);
 				jobCount += job.getSize();
 				hdd.remove(job);
@@ -193,7 +197,7 @@ public class Main {
 		Collections.sort(hdd, Job.thePriority);
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= 100) {
+			if ((job.getSize() + jobCount) <= ramSize) {
 				temp.add(job);
 				jobCount += job.getSize();
 				hdd.remove(job);
