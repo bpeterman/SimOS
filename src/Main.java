@@ -7,35 +7,34 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-	static int numCPUs=1;
-	static int ramSize=100;
+	static int numCPUs = 1;
+	static int ramSize = 100;
 	/*
 	 * 
-	 * Need to decrement waiting queues.  Also change where the times are set
-	 * Need to add multiple CPU support.
-	 * Change the way the CPU executes to execute a job only if there is a wait on last instruction.
-	 * Terminate queue
+	 * Need to decrement waiting queues. Also change where the times are set
+	 * Need to add multiple CPU support. Change the way the CPU executes to
+	 * execute a job only if there is a wait on last instruction. Terminate
+	 * queue
 	 * 
 	 * Maybe create some other CPU object to execute and store flags on state.
 	 * 
-	 * Load the Readyqueue with jobs on each CPU cycle, set limit on Readyqueue to the same as RAM
-	 * Handle readyqueue being full on transfer from waits
+	 * Load the Readyqueue with jobs on each CPU cycle, set limit on Readyqueue
+	 * to the same as RAM Handle Readyqueue being full on transfer from waits
 	 * 
 	 * 
 	 * Add all of the statistics
 	 * 
 	 * Make YouTube Video
-	 * 
-	 * 
 	 */
-	
+
 	static int cycleCount = 0;
 	static List<Job> ram = new ArrayList<Job>();
 	static List<Job> ReadyQueue = new ArrayList<Job>();
 	static List<Job> IOqueue = new ArrayList<Job>();
 	static List<Job> WaitQueue = new ArrayList<Job>();
 	static List<Job> hdd = new ArrayList<Job>();
-	
+	static List<Job> terminate = new ArrayList<Job>();
+
 	// add a terminate queue
 
 	public static void main(String[] args) {
@@ -70,55 +69,51 @@ public class Main {
 		System.out.println(job.myCPU.toString());
 	}
 
-	public static void executeCommand() {
-		if (!ReadyQueue.isEmpty()) {
-			if (ReadyQueue.get(0).programCounter != ReadyQueue.get(0)
-					.getInstr().size()) {
-				if (ReadyQueue.get(0).programCounter == 0) {
-					CPU myCPU = new CPU(1, 3, 5, 7, 9);
-					ReadyQueue.get(0).setMyCPU(myCPU);
-				}
-				String strCommand = ReadyQueue.get(0).getInstr()
-						.get(ReadyQueue.get(0).programCounter);
-				String[] commandArr = strCommand.split(", ");
-				if (commandArr[1].equals("mul")) {
-					ReadyQueue.get(0).myCPU.mul(commandArr[2].charAt(0),
-							commandArr[3].charAt(0));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("sub")) {
-					ReadyQueue.get(0).myCPU.sub(commandArr[2].charAt(0),
-							commandArr[3].charAt(0));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("add")) {
-					ReadyQueue.get(0).myCPU.add(commandArr[2].charAt(0),
-							commandArr[3].charAt(0));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("div")) {
-					ReadyQueue.get(0).myCPU.div(commandArr[2].charAt(0),
-							commandArr[3].charAt(0));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("rcl")) {
-					ReadyQueue.get(0).myCPU.rcl(commandArr[2].charAt(0));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("sto")) {
-					ReadyQueue.get(0).myCPU
-							.sto(Integer.parseInt(commandArr[4]));
-					ReadyQueue.get(0).programCounter++;
-				} else if (commandArr[1].equals("_rd")
-						|| commandArr[1].equals("_wr")) {
-					ReadyQueue.get(0).programCounter++;
-					ReadyQueue.get(0).setIOtime(
-							Integer.parseInt(commandArr[4]) + cycleCount); //change to just the time.
-					moveToIOQ(ReadyQueue.get(0));
-				} else if (commandArr[1].equals("_wt")) {
-					ReadyQueue.get(0).programCounter++;
-					ReadyQueue.get(0).setWaitTime(
-							Integer.parseInt(commandArr[4]) + cycleCount); //change to just the time.
-					moveToWaitQ(ReadyQueue.get(0));
-				}
-			} else {
-				removeFromRQ();
+	public static void executeCommand(Job curJob) {
+
+		if (curJob.programCounter != curJob.getInstr().size()) {
+			String strCommand = curJob.getInstr().get(curJob.programCounter);
+			String[] commandArr = strCommand.split(", ");
+			if (commandArr[1].equals("mul")) {
+				ReadyQueue.get(0).myCPU.mul(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("sub")) {
+				curJob.myCPU.sub(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("add")) {
+				curJob.myCPU.add(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("div")) {
+				curJob.myCPU.div(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("rcl")) {
+				curJob.myCPU.rcl(commandArr[2].charAt(0));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("sto")) {
+				curJob.myCPU.sto(Integer.parseInt(commandArr[4]));
+				curJob.programCounter++;
+			} else if (commandArr[1].equals("_rd")
+					|| commandArr[1].equals("_wr")) {
+				curJob.programCounter++;
+				curJob.setIOtime(Integer.parseInt(commandArr[4])); // change to
+																	// just the
+																	// time.
+				moveToIOQ(curJob);
+			} else if (commandArr[1].equals("_wt")) {
+				curJob.programCounter++;
+				curJob.setWaitTime(Integer.parseInt(commandArr[4])); // change
+																		// to
+																		// just
+																		// the
+																		// time.
+				moveToWaitQ(curJob);
 			}
+		} else {
+			removeFromRQ();
 		}
 
 		cycleCount++;
@@ -140,11 +135,14 @@ public class Main {
 	}
 
 	public static void checkWaitQueue() {
-		//insert decrement of all jobs here.
-		
+		// insert decrement of all jobs here.
+
 		if (!WaitQueue.isEmpty()) {
 			for (int i = 0; i < WaitQueue.size(); i++) {
-				if (WaitQueue.get(i).waitTime == cycleCount) { //be sure to change this to 0 not cycle count.
+				if (WaitQueue.get(i).waitTime == cycleCount) { // be sure to
+																// change this
+																// to 0 not
+																// cycle count.
 					WaitQueue.get(i).setWaitTime(0);
 					ReadyQueue.add(WaitQueue.get(i));
 					WaitQueue.remove(i);
@@ -155,12 +153,13 @@ public class Main {
 	}
 
 	public static void checkIOqueue() {
-		//insert decrement of all jobs here.
-		
-		
+		// insert decrement of all jobs here.
+
 		if (!IOqueue.isEmpty()) {
 			for (int i = 0; i < IOqueue.size(); i++) {
-				if (IOqueue.get(i).IOtime == cycleCount) { //be sure to change this to 0 not cycle count.
+				if (IOqueue.get(i).IOtime == cycleCount) { // be sure to change
+															// this to 0 not
+															// cycle count.
 					IOqueue.get(i).setIOtime(0);
 					ReadyQueue.add(IOqueue.get(i));
 					IOqueue.remove(i);
@@ -185,7 +184,8 @@ public class Main {
 		List<Job> temp = new ArrayList<Job>();
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= ramSize) { // if the job less than or
+			if ((job.getSize() + jobCount) <= ramSize) { // if the job less than
+															// or
 				temp.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				hdd.remove(job);

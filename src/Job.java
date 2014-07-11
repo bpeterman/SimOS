@@ -18,7 +18,7 @@ public class Job {
 		this.size = size;
 		this.priority = priority;
 		this.instr = instr;
-		this.myCPU = myCPU;
+		this.myCPU = new CPU(1, 3, 5, 7, 9);
 		this.programCounter = programCounter;
 		this.waitTime = waitTime;
 		this.IOtime = IOtime;
