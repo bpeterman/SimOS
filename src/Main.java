@@ -192,14 +192,10 @@ public class Main {
 
 	// Scheduler for the FIFO algorithm
 	public static void fifo() {
-		int jobCount = 0;
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + getRamSize()) <= ramLimit) { // if the job less
-																// than
-																// or
-				ram.add(job); // equal to 100 add it
-				jobCount += job.getSize();
+			if ((job.getSize() + getRamSize()) <= ramLimit) {
+				ram.add(job);
 				hdd.remove(job);
 				i--;
 
