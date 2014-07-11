@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-	static int numCPUs = 8;
-	static int ramLimit = 100;
+	static int numCPUs = 1;
+	static int ramLimit = 1050;
 	/*
 	 * 
 	 * 
@@ -35,7 +35,7 @@ public class Main {
 
 		while (!hdd.isEmpty() || !ReadyQueue.isEmpty() || !WaitQueue.isEmpty()
 				|| !ram.isEmpty() || !IOqueue.isEmpty() || coreCheck()) {
-			priority();
+			fifo();
 			STS(); // Takes jobs from RAM and put them in the RQ
 			dispatcher();
 			decWaitQueue();
@@ -43,9 +43,9 @@ public class Main {
 			decIOQueue();
 			checkIOqueue();
 			cycleCount++;
-			System.out.println(cycleCount);
 		}
 		printTerm();
+		System.out.println("Cycle Count: "+cycleCount);
 	}
 
 	/*
