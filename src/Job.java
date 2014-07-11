@@ -32,12 +32,20 @@ public class Job {
 		this.waitTime = waitTime;
 	}
 
+	public void decWaitTime() {
+		waitTime--;
+	}
+
 	public int getIOtime() {
 		return IOtime;
 	}
 
 	public void setIOtime(int iOtime) {
 		IOtime = iOtime;
+	}
+
+	public void decIOTime() {
+		IOtime--;
 	}
 
 	public CPU getMyCPU() {
