@@ -7,8 +7,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-	static int numCPUs = 4;
-	static int ramLimit = 200;
+	static int numCPUs = 1;
+	static int ramLimit = 100;
 	/*
 	 * 
 	 * 
@@ -186,8 +186,6 @@ public class Main {
 			if (addToRQ(job)) {
 				ram.remove(i);
 				i--;
-			} else {
-				break;
 			}
 		}
 	}
