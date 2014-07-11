@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-	static int numCPUs = 1;
+	static int numCPUs = 8;
 	static int ramLimit = 100;
 	/*
 	 * 
@@ -34,8 +34,8 @@ public class Main {
 								// object.
 
 		while (!hdd.isEmpty() || !ReadyQueue.isEmpty() || !WaitQueue.isEmpty()
-				|| !ram.isEmpty() || !IOqueue.isEmpty()) {
-			fifo();
+				|| !ram.isEmpty() || !IOqueue.isEmpty() || coreCheck()) {
+			priority();
 			STS(); // Takes jobs from RAM and put them in the RQ
 			dispatcher();
 			decWaitQueue();
@@ -205,39 +205,31 @@ public class Main {
 	}
 
 	// Scheduler for the SJF algorithm
-	public static List<Job> sjf() {
-		int jobCount = 0;
-		List<Job> temp = new ArrayList<Job>();
+	public static void sjf() {
 		Collections.sort(hdd, Job.sjf);
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= ramLimit) {
-				temp.add(job);
-				jobCount += job.getSize();
+			if ((job.getSize() + getRamSize()) <= ramLimit) {
+				ram.add(job);
 				hdd.remove(job);
 				i--;
 			} else
 				break;
 		}
-		return temp;
 	}
 
 	// Scheduler for the priority algorithm
-	public static List<Job> priority() {
-		int jobCount = 0;
-		List<Job> temp = new ArrayList<Job>();
+	public static void priority() {
 		Collections.sort(hdd, Job.thePriority);
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= ramLimit) {
-				temp.add(job);
-				jobCount += job.getSize();
+			if ((job.getSize() + getRamSize()) <= ramLimit) {
+				ram.add(job);
 				hdd.remove(job);
 				i--;
 			} else
 				break;
 		}
-		return temp;
 	}
 
 	// This reads all the data from the file and stores it in the hdd object.
@@ -351,6 +343,17 @@ public class Main {
 		if ((getRQSize() + myJob.size) <= ramLimit) {
 			ReadyQueue.add(myJob);
 			return true;
+		}
+		return false;
+	}
+	
+	public static boolean coreCheck(){
+		for (int i = 0; i < cores.size(); i++) {
+			if (cores.get(i).theJob == null){
+				
+			} else {
+				return true;
+			}
 		}
 		return false;
 	}
