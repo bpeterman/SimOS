@@ -7,19 +7,10 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
-	static int numCPUs = 1;
+	static int numCPUs = 4;
 	static int ramLimit = 100;
 	/*
-	 *  
-	 * Need to add multiple CPU support. Change the way the CPU executes to
-	 * execute a job only if there is a wait on last instruction. 
 	 * 
-	 * Load the Readyqueue with jobs on each CPU cycle, set limit on Readyqueue
-	 * to the same as RAM 
-	 * 
-	 * Handle Readyqueue being full on transfer from waits
-	 * 
-	 * Print the terminate queue out with printReg(Job) at the end of program
 	 * 
 	 * Add all of the statistics
 	 * 
@@ -38,36 +29,44 @@ public class Main {
 	public static void main(String[] args) {
 
 		initCores(); // initializing the cores in the system
-		
+
 		hdd = readAndWrite(); // Read all the jobs from the file to the HD
 								// object.
 
 		while (!hdd.isEmpty() || !ReadyQueue.isEmpty() || !WaitQueue.isEmpty()
-				|| !ram.isEmpty()) {
-			ram = fifo();
-			STS();  // Takes jobs from RAM and put them in the RQ
-			sendToCores(); 
-			checkWaitQueue();  
+				|| !ram.isEmpty() || !IOqueue.isEmpty()) {
+			fifo();
+			STS(); // Takes jobs from RAM and put them in the RQ
+			dispatcher();
+			decWaitQueue();
+			checkWaitQueue();
+			decIOQueue();
 			checkIOqueue();
 			cycleCount++;
+			System.out.println(cycleCount);
 		}
+		printTerm();
 	}
-	
-	/* Sends a job to a core if it is ready for a new job.
-	 * Otherwise it sends it the job it was working on last 
+
+	/*
+	 * Sends a job to a core if it is ready for a new job. Otherwise it sends it
+	 * the job it was working on last
 	 */
-	public static void sendToCores() {
+	public static void dispatcher() {
 		for (int i = 0; i < cores.size(); i++) {
-			if(cores.get(i).isReady()){
-				cores.add(i, executeCommand(cores.get(i), ReadyQueue.get(0)));
+			if (cores.get(i).isReady()) {
+				if (!ReadyQueue.isEmpty()){
+					cores.set(i, executeCommand(cores.get(i), ReadyQueue.get(0)));
+					ReadyQueue.remove(0);
+				}
 			} else {
-				cores.add(i, executeCommand(cores.get(i), cores.get(i).theJob));
+				cores.set(i, executeCommand(cores.get(i), cores.get(i).theJob));
 			}
 		}
 	}
 
 	public static Core executeCommand(Core theCore, Job curJob) {
-		if (!theCore.isReady()){
+		if (theCore.isReady()) {
 			theCore.setReady(false);
 		}
 		if (curJob.programCounter != curJob.getInstr().size()) {
@@ -117,6 +116,8 @@ public class Main {
 			}
 		} else {
 			terminate.add(curJob);
+			theCore.setReady(true);
+			theCore.setTheJob(null);
 		}
 		return theCore;
 	}
@@ -128,74 +129,76 @@ public class Main {
 
 	public static void moveToWaitQ(Job job) {
 		WaitQueue.add(job);
-		ReadyQueue.remove(0);
 	}
 
 	public static void moveToIOQ(Job job) {
 		IOqueue.add(job);
-		ReadyQueue.remove(0);
 	}
 
 	public static void checkWaitQueue() {
-		// insert decrement of all jobs here.
-		
-		for (int i = 0; i<WaitQueue.size(); i++){
-			WaitQueue.get(i).decWaitTime();
-		}
-
 		if (!WaitQueue.isEmpty()) {
 			for (int i = 0; i < WaitQueue.size(); i++) {
-				if (WaitQueue.get(i).waitTime == cycleCount) { // be sure to
-																// change this
-																// to 0 not
-																// cycle count.
-					WaitQueue.get(i).setWaitTime(0);
-					ReadyQueue.add(WaitQueue.get(i));
-					WaitQueue.remove(i);
-					checkWaitQueue();
+				if (WaitQueue.get(i).waitTime == 0) {
+					if (addToRQ(WaitQueue.get(i))) {
+						WaitQueue.remove(i);
+						checkWaitQueue();
+					}
 				}
 			}
+		}
+	}
+	public static void decWaitQueue(){
+		for (int i = 0; i < WaitQueue.size(); i++) {
+			if (WaitQueue.get(i).waitTime > 0)
+				WaitQueue.get(i).decWaitTime();
 		}
 	}
 
 	public static void checkIOqueue() {
-		// insert decrement of all jobs here.
-		for (int i = 0; i<IOqueue.size(); i++){
-			IOqueue.get(i).decIOTime();
+		for (int i = 0; i < IOqueue.size(); i++) {
+			if (IOqueue.get(i).IOtime > 0)
+				IOqueue.get(i).decIOTime();
 		}
 		if (!IOqueue.isEmpty()) {
 			for (int i = 0; i < IOqueue.size(); i++) {
-				if (IOqueue.get(i).IOtime == cycleCount) { // be sure to change
-															// this to 0 not
-															// cycle count.
-					IOqueue.get(i).setIOtime(0);
-					ReadyQueue.add(IOqueue.get(i));
-					IOqueue.remove(i);
-					checkIOqueue();
+				if (IOqueue.get(i).IOtime == 0) {
+					if (addToRQ(IOqueue.get(i))) {
+						IOqueue.remove(i);
+						checkIOqueue();
+					}
 				}
 			}
 		}
 	}
+	
+	public static void decIOQueue(){
+		for (int i = 0; i < IOqueue.size(); i++) {
+			if (IOqueue.get(i).IOtime > 0)
+				IOqueue.get(i).decIOTime();
+		}
+	}
 
 	public static void STS() {
-		for (int i = 0; i < ram.size(); i++) {
+		for (int i=0; i < ram.size(); i++) {
 			Job job = ram.get(i);
-			ReadyQueue.add(job);
-			ram.remove(i);
-			i--;
+			if(addToRQ(job)){
+				ram.remove(i);
+				i--;
+			} else {
+				break;
+			}
 		}
 	}
 
 	// Scheduler for the FIFO algorithm
-	public static List<Job> fifo() {
+	public static void fifo() {
 		int jobCount = 0;
-		List<Job> temp = new ArrayList<Job>();
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
-			if ((job.getSize() + jobCount) <= ramLimit) { // if the job less
+			if ((job.getSize() + getRamSize()) <= ramLimit) { // if the job less
 															// than
 															// or
-				temp.add(job); // equal to 100 add it
+				ram.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				hdd.remove(job);
 				i--;
@@ -203,7 +206,6 @@ public class Main {
 			} else
 				break;
 		}
-		return temp;
 	}
 
 	// Scheduler for the SJF algorithm
@@ -314,7 +316,7 @@ public class Main {
 	public static int getRamSize() {
 		int size = 0;
 		for (int i = 0; i < ram.size(); i++) {
-			size += ram.get(i).size;
+			size = size + ram.get(i).size;
 		}
 
 		return size;
@@ -324,11 +326,37 @@ public class Main {
 		System.out.print("Job Number: " + job.jobNum + ": ");
 		System.out.println(job.myCPU.toString());
 	}
-	
-	public static void initCores(){
-		for (int i = 0; i<ramLimit; i++){
-			cores.add(null);
+
+	public static void printTerm() {
+		for (int i = 0; i < terminate.size(); i++) {
+			Job job = terminate.get(i);
+			System.out.print("Job Number: " + job.jobNum + ": ");
+			System.out.println(job.myCPU.toString());
 		}
+	}
+
+	public static void initCores() {
+		for (int i = 0; i < numCPUs; i++) {
+			Core core = new Core(true, null);
+			cores.add(core);
+			core = null;
+		}
+	}
+
+	public static int getRQSize() {
+		int size = 0;
+		for (int i = 0; i < ReadyQueue.size(); i++) {
+			size = size + ReadyQueue.get(i).size;
+		}
+		return size;
+	}
+
+	public static boolean addToRQ(Job myJob) {
+		if ((getRQSize() + myJob.size) <= ramLimit) {
+			ReadyQueue.add(myJob);
+			return true;
+		}
+		return false;
 	}
 
 }
