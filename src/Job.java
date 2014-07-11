@@ -7,12 +7,53 @@ public class Job {
 	int size;
 	int priority;
 	List<String> instr;
+	CPU myCPU;
+	int programCounter;
+	int waitTime;
+	int IOtime;
 
-	public Job(int jobNum, int size, int priority, List<String> instr) {
+	public Job(int jobNum, int size, int priority, List<String> instr,
+			CPU myCPU, int programCounter, int waitTime, int IOtime) {
 		this.jobNum = jobNum;
 		this.size = size;
 		this.priority = priority;
 		this.instr = instr;
+		this.myCPU = new CPU(1, 3, 5, 7, 9);
+		this.programCounter = programCounter;
+		this.waitTime = waitTime;
+		this.IOtime = IOtime;
+	}
+
+	public int getWaitTime() {
+		return waitTime;
+	}
+
+	public void setWaitTime(int waitTime) {
+		this.waitTime = waitTime;
+	}
+
+	public void decWaitTime() {
+		waitTime--;
+	}
+
+	public int getIOtime() {
+		return IOtime;
+	}
+
+	public void setIOtime(int iOtime) {
+		IOtime = iOtime;
+	}
+
+	public void decIOTime() {
+		IOtime--;
+	}
+
+	public CPU getMyCPU() {
+		return myCPU;
+	}
+
+	public void setMyCPU(CPU myCPU) {
+		this.myCPU = myCPU;
 	}
 
 	public int getJobNum() {
@@ -47,11 +88,26 @@ public class Job {
 		this.instr = instr;
 	}
 
+	public int getProgramCounter() {
+		return programCounter;
+	}
+
+	public void setProgramCounter(int programCounter) {
+		this.programCounter = programCounter;
+	}
+
+	public static Comparator<Job> getThePriority() {
+		return thePriority;
+	}
+
+	public static void setThePriority(Comparator<Job> thePriority) {
+		Job.thePriority = thePriority;
+	}
+
 	public String toString() {
 		return String.format("Job Number: " + jobNum + " Size: " + size
 				+ " Priority: " + priority + " Intructions: "
-				+ Arrays.toString(instr.toArray()))
-				+ "\n";
+				+ Arrays.toString(instr.toArray()) + "\n");
 	}
 
 	/* Comparator for sorting the list by size */
@@ -73,10 +129,10 @@ public class Job {
 			int no1 = j1.getPriority();
 			int no2 = j2.getPriority();
 			/* For ascending order */
-			// return no1 - no2;
+			return no1 - no2;
 
 			/* For descending order */
-			return no2 - no1;
+			// return no2 - no1;
 		}
 	};
 

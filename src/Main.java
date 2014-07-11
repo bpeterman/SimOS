@@ -7,83 +7,239 @@ import java.util.Collections;
 import java.util.List;
 
 public class Main {
+	static int numCPUs = 1;
+	static int ramLimit = 100;
+	/*
+	 * 
+	 * 
+	 * Add all of the statistics
+	 * 
+	 * Make YouTube Video
+	 */
+
+	static int cycleCount = 0;
+	static List<Job> ram = new ArrayList<Job>();
+	static List<Job> ReadyQueue = new ArrayList<Job>();
+	static List<Job> IOqueue = new ArrayList<Job>();
+	static List<Job> WaitQueue = new ArrayList<Job>();
+	static List<Job> hdd = new ArrayList<Job>();
+	static List<Job> terminate = new ArrayList<Job>();
+	static List<Core> cores = new ArrayList<Core>();
 
 	public static void main(String[] args) {
-		List<Job> hdd = new ArrayList<Job>();
-		List<Job> ram = new ArrayList<Job>();
-		hdd = readAndWrite(); // write the contents of the file into the
-								// List<Job> object
 
-		ram = fifo(hdd);
-		printSpaces("FIFO");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
+		initCores(); // initializing the cores in the system
 
-		ram = sjf(hdd);
-		printSpaces("Shortest Job First");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
+		hdd = readAndWrite(); // Read all the jobs from the file to the HD
+								// object.
 
-		ram = priority(hdd);
-		printSpaces("Priority");
-		printRam(ram);
-		ram = new ArrayList<Job>(); // clear the ram for the next algorithm
-
+		while (!hdd.isEmpty() || !ReadyQueue.isEmpty() || !WaitQueue.isEmpty()
+				|| !ram.isEmpty() || !IOqueue.isEmpty()) {
+			fifo();
+			STS(); // Takes jobs from RAM and put them in the RQ
+			dispatcher();
+			decWaitQueue();
+			checkWaitQueue();
+			decIOQueue();
+			checkIOqueue();
+			cycleCount++;
+			System.out.println(cycleCount);
+		}
+		printTerm();
 	}
 
-	public static void printRam(List<Job> ram) {
-		System.out.println(Arrays.toString(ram.toArray()));
+	/*
+	 * Sends a job to a core if it is ready for a new job. Otherwise it sends it
+	 * the job it was working on last
+	 */
+	public static void dispatcher() {
+		for (int i = 0; i < cores.size(); i++) {
+			if (cores.get(i).isReady()) {
+				if (!ReadyQueue.isEmpty()) {
+					cores.set(i,
+							executeCommand(cores.get(i), ReadyQueue.get(0)));
+					ReadyQueue.remove(0);
+				}
+			} else {
+				cores.set(i, executeCommand(cores.get(i), cores.get(i).theJob));
+			}
+		}
 	}
 
-	public static void printSpaces(String alg) {
-		System.out.println("Algorithm: " + alg);
+	public static Core executeCommand(Core theCore, Job curJob) {
+		if (theCore.isReady()) {
+			theCore.setReady(false);
+		}
+		if (curJob.programCounter != curJob.getInstr().size()) {
+			String strCommand = curJob.getInstr().get(curJob.programCounter);
+			String[] commandArr = strCommand.split(", ");
+			if (commandArr[1].equals("mul")) {
+				curJob.myCPU.mul(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("sub")) {
+				curJob.myCPU.sub(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("add")) {
+				curJob.myCPU.add(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("div")) {
+				curJob.myCPU.div(commandArr[2].charAt(0),
+						commandArr[3].charAt(0));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("rcl")) {
+				curJob.myCPU.rcl(commandArr[2].charAt(0));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("sto")) {
+				curJob.myCPU.sto(Integer.parseInt(commandArr[4]));
+				curJob.programCounter++;
+				theCore.setTheJob(curJob);
+			} else if (commandArr[1].equals("_rd")
+					|| commandArr[1].equals("_wr")) {
+				curJob.programCounter++;
+				curJob.setIOtime(Integer.parseInt(commandArr[4]));
+				moveToIOQ(curJob);
+				theCore.setReady(true);
+				theCore.setTheJob(null);
+			} else if (commandArr[1].equals("_wt")) {
+				curJob.programCounter++;
+				curJob.setWaitTime(Integer.parseInt(commandArr[4]));
+				moveToWaitQ(curJob);
+				theCore.setReady(true);
+				theCore.setTheJob(null);
+			}
+		} else {
+			terminate.add(curJob);
+			theCore.setReady(true);
+			theCore.setTheJob(null);
+		}
+		return theCore;
 	}
 
-	public static void printHDD(List<Job> hdd) {
-		System.out.println(Arrays.toString(hdd.toArray()));
+	public static void removeFromRQ() {
+		printReg(ReadyQueue.get(0));
+		ReadyQueue.remove(0);
+	}
 
+	public static void moveToWaitQ(Job job) {
+		WaitQueue.add(job);
+	}
+
+	public static void moveToIOQ(Job job) {
+		IOqueue.add(job);
+	}
+
+	public static void checkWaitQueue() {
+		if (!WaitQueue.isEmpty()) {
+			for (int i = 0; i < WaitQueue.size(); i++) {
+				if (WaitQueue.get(i).waitTime == 0) {
+					if (addToRQ(WaitQueue.get(i))) {
+						WaitQueue.remove(i);
+						checkWaitQueue();
+					}
+				}
+			}
+		}
+	}
+
+	public static void decWaitQueue() {
+		for (int i = 0; i < WaitQueue.size(); i++) {
+			if (WaitQueue.get(i).waitTime > 0)
+				WaitQueue.get(i).decWaitTime();
+		}
+	}
+
+	public static void checkIOqueue() {
+		for (int i = 0; i < IOqueue.size(); i++) {
+			if (IOqueue.get(i).IOtime > 0)
+				IOqueue.get(i).decIOTime();
+		}
+		if (!IOqueue.isEmpty()) {
+			for (int i = 0; i < IOqueue.size(); i++) {
+				if (IOqueue.get(i).IOtime == 0) {
+					if (addToRQ(IOqueue.get(i))) {
+						IOqueue.remove(i);
+						checkIOqueue();
+					}
+				}
+			}
+		}
+	}
+
+	public static void decIOQueue() {
+		for (int i = 0; i < IOqueue.size(); i++) {
+			if (IOqueue.get(i).IOtime > 0)
+				IOqueue.get(i).decIOTime();
+		}
+	}
+
+	public static void STS() {
+		for (int i = 0; i < ram.size(); i++) {
+			Job job = ram.get(i);
+			if (addToRQ(job)) {
+				ram.remove(i);
+				i--;
+			}
+		}
 	}
 
 	// Scheduler for the FIFO algorithm
-	public static List<Job> fifo(List<Job> hdd) {
+	public static void fifo() {
 		int jobCount = 0;
-		List<Job> temp = new ArrayList<Job>();
-		for (Job job : hdd) {
-			if ((job.getSize() + jobCount) <= 100) { // if the job less than or
-				temp.add(job); // equal to 100 add it
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
+			if ((job.getSize() + getRamSize()) <= ramLimit) { // if the job less
+																// than
+																// or
+				ram.add(job); // equal to 100 add it
 				jobCount += job.getSize();
-				job = null;
-			}
+				hdd.remove(job);
+				i--;
+
+			} else
+				break;
 		}
-		return temp;
 	}
 
 	// Scheduler for the SJF algorithm
-	public static List<Job> sjf(List<Job> hdd) {
+	public static List<Job> sjf() {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.sjf);
-		for (Job job : hdd) {
-			if ((job.getSize() + jobCount) <= 100) {
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
+			if ((job.getSize() + jobCount) <= ramLimit) {
 				temp.add(job);
 				jobCount += job.getSize();
-				job = null;
-			}
+				hdd.remove(job);
+				i--;
+			} else
+				break;
 		}
 		return temp;
 	}
 
 	// Scheduler for the priority algorithm
-	public static List<Job> priority(List<Job> hdd) {
+	public static List<Job> priority() {
 		int jobCount = 0;
 		List<Job> temp = new ArrayList<Job>();
 		Collections.sort(hdd, Job.thePriority);
-		for (Job job : hdd) {
-			if ((job.getSize() + jobCount) <= 100) {
+		for (int i = 0; i < hdd.size(); i++) {
+			Job job = hdd.get(i);
+			if ((job.getSize() + jobCount) <= ramLimit) {
 				temp.add(job);
 				jobCount += job.getSize();
-				job = null;
-			}
+				hdd.remove(job);
+				i--;
+			} else
+				break;
 		}
 		return temp;
 	}
@@ -94,7 +250,7 @@ public class Main {
 		int jobNum = 0;
 		int size = 0;
 		int priority = 0;
-		List<Job> hdd = new ArrayList<Job>();
+
 		List<String> jobs = new ArrayList<String>();
 
 		BufferedReader br = null;
@@ -105,7 +261,8 @@ public class Main {
 			while ((sCurrentLine = br.readLine()) != null) {
 				if (sCurrentLine.contains("Job")) {
 					if (jobCount != 0) {
-						Job myJob = new Job(jobNum, size, priority, jobs);
+						Job myJob = new Job(jobNum, size, priority, jobs, null,
+								0, 0, 0);
 						hdd.add(myJob);
 						myJob = null;
 						jobs = new ArrayList<String>();
@@ -131,12 +288,75 @@ public class Main {
 				ex.printStackTrace();
 			}
 		}
-		Job myJob = new Job(jobNum, size, priority, jobs);
+		Job myJob = new Job(jobNum, size, priority, jobs, null, 0, 0, 0);
 		hdd.add(myJob);
 		myJob = null;
 		jobs = null;
 		return hdd;
 
+	}
+
+	public static void printRam(String alg) {
+		System.out.println("Algorithm: " + alg);
+		System.out.println(Arrays.toString(ram.toArray()));
+	}
+
+	public static void printHDD() {
+		System.out.println("Print the HDD");
+		System.out.println(Arrays.toString(hdd.toArray()));
+
+	}
+
+	public static void printRQ() {
+		System.out.println("Print the RQ");
+		System.out.println(Arrays.toString(ReadyQueue.toArray()));
+
+	}
+
+	public static int getRamSize() {
+		int size = 0;
+		for (int i = 0; i < ram.size(); i++) {
+			size = size + ram.get(i).size;
+		}
+
+		return size;
+	}
+
+	public static void printReg(Job job) {
+		System.out.print("Job Number: " + job.jobNum + ": ");
+		System.out.println(job.myCPU.toString());
+	}
+
+	public static void printTerm() {
+		for (int i = 0; i < terminate.size(); i++) {
+			Job job = terminate.get(i);
+			System.out.print("Job Number: " + job.jobNum + ": ");
+			System.out.println(job.myCPU.toString());
+		}
+	}
+
+	public static void initCores() {
+		for (int i = 0; i < numCPUs; i++) {
+			Core core = new Core(true, null);
+			cores.add(core);
+			core = null;
+		}
+	}
+
+	public static int getRQSize() {
+		int size = 0;
+		for (int i = 0; i < ReadyQueue.size(); i++) {
+			size = size + ReadyQueue.get(i).size;
+		}
+		return size;
+	}
+
+	public static boolean addToRQ(Job myJob) {
+		if ((getRQSize() + myJob.size) <= ramLimit) {
+			ReadyQueue.add(myJob);
+			return true;
+		}
+		return false;
 	}
 
 }
