@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Main {
 	static int numCPUs = 4;
-	static int ramLimit = 100;
+	static int ramLimit = 200;
 	/*
 	 * 
 	 * 
@@ -55,8 +55,9 @@ public class Main {
 	public static void dispatcher() {
 		for (int i = 0; i < cores.size(); i++) {
 			if (cores.get(i).isReady()) {
-				if (!ReadyQueue.isEmpty()){
-					cores.set(i, executeCommand(cores.get(i), ReadyQueue.get(0)));
+				if (!ReadyQueue.isEmpty()) {
+					cores.set(i,
+							executeCommand(cores.get(i), ReadyQueue.get(0)));
 					ReadyQueue.remove(0);
 				}
 			} else {
@@ -147,7 +148,8 @@ public class Main {
 			}
 		}
 	}
-	public static void decWaitQueue(){
+
+	public static void decWaitQueue() {
 		for (int i = 0; i < WaitQueue.size(); i++) {
 			if (WaitQueue.get(i).waitTime > 0)
 				WaitQueue.get(i).decWaitTime();
@@ -170,8 +172,8 @@ public class Main {
 			}
 		}
 	}
-	
-	public static void decIOQueue(){
+
+	public static void decIOQueue() {
 		for (int i = 0; i < IOqueue.size(); i++) {
 			if (IOqueue.get(i).IOtime > 0)
 				IOqueue.get(i).decIOTime();
@@ -179,9 +181,9 @@ public class Main {
 	}
 
 	public static void STS() {
-		for (int i=0; i < ram.size(); i++) {
+		for (int i = 0; i < ram.size(); i++) {
 			Job job = ram.get(i);
-			if(addToRQ(job)){
+			if (addToRQ(job)) {
 				ram.remove(i);
 				i--;
 			} else {
@@ -196,8 +198,8 @@ public class Main {
 		for (int i = 0; i < hdd.size(); i++) {
 			Job job = hdd.get(i);
 			if ((job.getSize() + getRamSize()) <= ramLimit) { // if the job less
-															// than
-															// or
+																// than
+																// or
 				ram.add(job); // equal to 100 add it
 				jobCount += job.getSize();
 				hdd.remove(job);
