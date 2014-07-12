@@ -11,9 +11,11 @@ public class Job {
 	int programCounter;
 	int waitTime;
 	int IOtime;
+	int timeWaiting;
+	int timeRunning;
 
 	public Job(int jobNum, int size, int priority, List<String> instr,
-			CPU myCPU, int programCounter, int waitTime, int IOtime) {
+			CPU myCPU, int programCounter, int waitTime, int IOtime, int timeWaiting, int timeRunning) {
 		this.jobNum = jobNum;
 		this.size = size;
 		this.priority = priority;
@@ -22,6 +24,32 @@ public class Job {
 		this.programCounter = programCounter;
 		this.waitTime = waitTime;
 		this.IOtime = IOtime;
+		this.timeWaiting = 0;
+		this.timeRunning = 0;
+	}
+	
+	public void incTimeRunning() {
+		timeRunning++;
+	}
+
+	public int getTimeRunning() {
+		return timeRunning;
+	}
+
+	public void setTimeRunning(int timeRunning) {
+		this.timeRunning = timeRunning;
+	}
+
+	public void incTimeWaiting() {
+		timeWaiting++;
+	}
+	
+	public int getTimeWaiting() {
+		return timeWaiting;
+	}
+
+	public void setTimeWaiting(int timeWaiting) {
+		this.timeWaiting = timeWaiting;
 	}
 
 	public int getWaitTime() {

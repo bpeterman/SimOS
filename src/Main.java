@@ -8,14 +8,7 @@ import java.util.List;
 
 public class Main {
 	static int numCPUs = 1;
-	static int ramLimit = 1050;
-	/*
-	 * 
-	 * 
-	 * Add all of the statistics
-	 * 
-	 * Make YouTube Video
-	 */
+	static int ramLimit = 50;
 
 	static int cycleCount = 0;
 	static List<Job> ram = new ArrayList<Job>();
@@ -35,7 +28,7 @@ public class Main {
 
 		while (!hdd.isEmpty() || !ReadyQueue.isEmpty() || !WaitQueue.isEmpty()
 				|| !ram.isEmpty() || !IOqueue.isEmpty() || coreCheck()) {
-			fifo();
+			sjf();
 			STS(); // Takes jobs from RAM and put them in the RQ
 			dispatcher();
 			decWaitQueue();
@@ -46,6 +39,25 @@ public class Main {
 		}
 		printTerm();
 		System.out.println("Cycle Count: "+cycleCount);
+		System.out.println("Average Run:" + averageRun());
+		System.out.println("Average Wait:" + averageWait());
+	}
+	
+	
+	public static int averageWait(){
+		int count=0;
+		for(int i = 0; i<terminate.size(); i++){
+			count = count + terminate.get(i).timeWaiting;
+		}
+		return count/terminate.size();
+	}
+	
+	public static int averageRun(){
+		int count=0;
+		for(int i = 0; i<terminate.size(); i++){
+			count = count + terminate.get(i).timeRunning;
+		}
+		return count/terminate.size();
 	}
 
 	/*
@@ -70,6 +82,8 @@ public class Main {
 		if (theCore.isReady()) {
 			theCore.setReady(false);
 		}
+		curJob.incTimeRunning();
+		
 		if (curJob.programCounter != curJob.getInstr().size()) {
 			String strCommand = curJob.getInstr().get(curJob.programCounter);
 			String[] commandArr = strCommand.split(", ");
@@ -151,6 +165,7 @@ public class Main {
 
 	public static void decWaitQueue() {
 		for (int i = 0; i < WaitQueue.size(); i++) {
+			WaitQueue.get(i).incTimeWaiting();
 			if (WaitQueue.get(i).waitTime > 0)
 				WaitQueue.get(i).decWaitTime();
 		}
@@ -175,6 +190,7 @@ public class Main {
 
 	public static void decIOQueue() {
 		for (int i = 0; i < IOqueue.size(); i++) {
+			IOqueue.get(i).incTimeWaiting();
 			if (IOqueue.get(i).IOtime > 0)
 				IOqueue.get(i).decIOTime();
 		}
@@ -250,7 +266,7 @@ public class Main {
 				if (sCurrentLine.contains("Job")) {
 					if (jobCount != 0) {
 						Job myJob = new Job(jobNum, size, priority, jobs, null,
-								0, 0, 0);
+								0, 0, 0, 0, 0);
 						hdd.add(myJob);
 						myJob = null;
 						jobs = new ArrayList<String>();
@@ -276,7 +292,7 @@ public class Main {
 				ex.printStackTrace();
 			}
 		}
-		Job myJob = new Job(jobNum, size, priority, jobs, null, 0, 0, 0);
+		Job myJob = new Job(jobNum, size, priority, jobs, null, 0, 0, 0, 0, 0);
 		hdd.add(myJob);
 		myJob = null;
 		jobs = null;
