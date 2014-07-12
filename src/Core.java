@@ -24,8 +24,5 @@ public class Core {
 	public void setTheJob(Job theJob) {
 		this.theJob = theJob;
 	}
-
-	
-	
 	
 }
